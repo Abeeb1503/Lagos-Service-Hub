@@ -1,0 +1,155 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  address      Json
+  verified     Boolean  @default(false)
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sellerProfile    SellerProfile?
+  jobsAsBuyer      Job[]          @relation("BuyerJobs")
+  jobsAsSeller     Job[]          @relation("SellerJobs")
+  messagesSent     ChatMessage[]  @relation("MessagesSent")
+  messagesReceived ChatMessage[]  @relation("MessagesReceived")
+
+  @@index([email])
+  @@index([role])
+}
+
+enum Role {
+  buyer
+  seller
+  admin
+}
+
+model SellerProfile {
+  id                 String             @id @default(uuid())
+  userId             String             @unique
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category           String
+  summary            String
+  portfolioImages    String[]
+  idDocumentUrl      String?
+  testimonials       Json[]
+  rating             Float              @default(0)
+  reviewsCount       Int                @default(0)
+  verificationStatus VerificationStatus @default(pending)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([category])
+  @@index([rating])
+}
+
+enum VerificationStatus {
+  pending
+  approved
+  rejected
+}
+
+model Job {
+  id                 String    @id @default(uuid())
+  buyerId            String
+  buyer              User      @relation("BuyerJobs", fields: [buyerId], references: [id])
+  sellerId           String
+  seller             User      @relation("SellerJobs", fields: [sellerId], references: [id])
+  title              String
+  description        String
+  agreedAmount       Float
+  depositAmount      Float
+  platformCommission Float
+  status             JobStatus @default(proposed)
+  satisfactionReports Json[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  payments  PaymentTransaction[]
+  messages  ChatMessage[]
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([status])
+}
+
+enum JobStatus {
+  proposed
+  funded
+  in_progress
+  partial_completed
+  completed
+  disputed
+  cancelled
+}
+
+model PaymentTransaction {
+  id                String        @id @default(uuid())
+  jobId             String
+  job               Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  amount            Float
+  currency          String        @default("NGN")
+  type              PaymentType
+  status            PaymentStatus @default(pending)
+  providerReference String        @unique
+  paystackData      Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([jobId])
+  @@index([providerReference])
+}
+
+enum PaymentType {
+  deposit
+  payout
+  refund
+}
+
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  refunded
+}
+
+model ChatMessage {
+  id          String    @id @default(uuid())
+  jobId       String
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  fromUserId  String
+  fromUser    User      @relation("MessagesSent", fields: [fromUserId], references: [id])
+  toUserId    String
+  toUser      User      @relation("MessagesReceived", fields: [toUserId], references: [id])
+  messageText String
+  attachments String[]
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([jobId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  userId    String?
+  adminId   String?
+  jobId     String?
+  details   Json
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
