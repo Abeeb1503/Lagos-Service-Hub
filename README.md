@@ -22,7 +22,7 @@ Tech Stack
 
 Themes
 - Light (Gold & Blue)
-- Dark (Gold & Blue)
+- Dark(Gold & Blue)
 - Midnight
 - Ocean Breeze
 - Warm Night
