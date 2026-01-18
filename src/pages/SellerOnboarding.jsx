@@ -13,7 +13,7 @@ import ProtectedRoute from '../components/auth/ProtectedRoute.jsx'
 import { api } from '../services/api.js'
 import { LAGOS_AREAS_OPTIONS, PROFESSIONS_OPTIONS } from '../utils/lagos.js'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : '')
 
 export default function SellerOnboarding() {
   const { user } = useAuth()

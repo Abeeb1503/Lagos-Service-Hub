@@ -4,7 +4,7 @@ import Button from '../common/Button.jsx'
 import TextArea from '../common/TextArea.jsx'
 import Toast from '../common/Toast.jsx'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : '')
 
 export default function SatisfactionReport({ jobId, onSubmitted }) {
   const [percentage, setPercentage] = useState(50)

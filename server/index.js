@@ -22,10 +22,19 @@ const adminRoutes = require('./routes/admin')
 
 const app = express()
 
+const allowedOrigins = String(process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
 app.use(helmet())
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true)
+      if (allowedOrigins.length === 0) return cb(null, true)
+      return allowedOrigins.includes(origin) ? cb(null, true) : cb(null, false)
+    },
     credentials: true,
   })
 )

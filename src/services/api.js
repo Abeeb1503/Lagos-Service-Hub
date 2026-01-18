@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : '')
 
 async function request(path, { method = 'GET', body, headers } = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -30,4 +30,3 @@ export const api = {
   patch: (path, body) => request(path, { method: 'PATCH', body }),
   put: (path, body) => request(path, { method: 'PUT', body }),
 }
-
